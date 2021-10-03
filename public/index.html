@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Moments card sender</title>
+  <!-- Axios library for API calls -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- Sign in with LiveChat SDK-->
+  <script src="https://cdn.livechatinc.com/accounts/accounts-sdk.min.js"></script>
+
+  <!-- LiveChat Agent App SDK-->
+  <script src="https://unpkg.com/@livechat/agent-app-sdk@latest/dist/agentapp.umd.min.js"></script>
+
+  <!-- Design system styles -->
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+
+
+  <!-- Sending rich message via Agent Chat API -->
+  <script>
+    const richMessage = () => {
+      // creating variable for a URL
+      const rmURL = document.getElementsByName("rmURL")[0].value;
+
+      // creating variable for a image URL
+      const rmIMAGE = document.getElementsByName("rmIMAGE")[0].value;
+
+      // creating variable for a button text
+      const rmBUTTON = document.getElementsByName("rmBUTTON")[0].value;
+
+      // creating variable for a title
+      const rmTITLE = document.getElementsByName("rmTITLE")[0].value;
+
+      // creating variable for a subtitle
+      const rmSUBTITLE = document.getElementsByName("rmSUBTITLE")[0].value;
+
+      // fields required for the "rich message" event, more info: https://developers.livechatinc.com/docs/messaging/agent-chat-api/
+      const payload = {
+        chat_id: chat_id,
+        event: {
+          type: "rich_message",
+          recipients: "all",
+          template_id: "cards",
+          elements: [
+            {
+              title: rmTITLE,
+              subtitle: rmSUBTITLE,
+              image: {
+                url: rmIMAGE
+              },
+              buttons: [
+                {
+                  text: rmBUTTON,
+                  type: "webview",
+                  value: rmURL,
+                  webview_height: "full",
+                  postback_id: "action_yes",
+                  user_ids: []
+                }
+              ]
+            }
+          ]
+        }
+      };
+
+      // send POST request to LiveChat API
+      axios.post('https://api.livechatinc.com/v3.1/agent/action/send_event',
+
+        // payload sent as body of the request
+        payload,
+        {
+          // required headers for the request
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + access_token
+          }
+        }
+      )
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  </script>
+
+
+
+  <!-- Obtaining chat_id data using Agent App SDK -->
+  <script>
+    LiveChat.createDetailsWidget().then(function (widget) {
+      widget.on("customer_profile", data => {
+        console.log(data),
+          chat_id = data.chat.chat_id;
+      });
+    });
+  </script>
+
+
+
+  <!-- Sign in with LiveChat Button -->
+  <a href="" onclick="instance.openPopup()">
+    <div id="livechat-login-button" class="livechat-login-button"></div>
+  </a>
+
+
+  <!-- Obtaining data about authorized user -->
+  <script>
+    var access_token;
+    const instance = AccountsSDK.init({
+      client_id: "your_client_id",
+      onIdentityFetched: (error, data) => {
+        if (data) {
+          console.log("User authorized!");
+          document.getElementById("livechat-login-button").style.display = "none";
+          document.getElementById("livechat-widget-form").style.display = "block";
+          console.log("License number: " + data.license);
+          access_token = data.access_token;
+          console.log(access_token);
+          console.log(error);
+        }
+      }
+    });
+  </script>
+
+
+
+  <!-- Form for sending the card -->
+  <form id="livechat-widget-form" style="display:none" class="" novalidate="">
+    <div class="lc-form__header" />
+    <div class="lc-form-group__header">
+      <div class="lc-form-group__label">Send link to your customer</div>
+      <div class="lc-form-group__helper">
+        Fill fields with link to your website and to your image
+      </div>
+    </div>
+    <div class="lc-field-group lc-field-group--inline">
+      <div class="lc-text-field">
+        <div class="">
+          <label class="lc-field-label" for="input-field-example-1">
+            URL
+          </label>
+        </div>
+        <div>
+          <input type="text" class="lc-input" value="" name="rmURL" required="" placeholder="URL..."
+            id="input-field-example-1" />
+
+          <span class="lc-field-description">
+            Field is required and should contain only letters
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lc-field-group lc-field-group--inline">
+      <div class="lc-text-field">
+        <div class="">
+          <label class="lc-field-label" for="input-field-example-1">
+            Image URL
+          </label>
+        </div>
+        <div>
+          <input type="text" class="lc-input" value="" name="rmIMAGE" required="" placeholder="Image URL..."
+            id="input-field-example-1" />
+
+          <span class="lc-field-description">
+            Field is required and should contain only letters
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lc-field-group lc-field-group--inline">
+      <div class="lc-text-field">
+        <div class="">
+          <label class="lc-field-label" for="input-field-example-1">
+            Title
+          </label>
+        </div>
+        <div>
+          <input type="text" class="lc-input" value="" name="rmTITLE" required="" placeholder="Title..."
+            id="input-field-example-1" />
+
+          <span class="lc-field-description">
+            Field is required and should contain only letters
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lc-field-group lc-field-group--inline">
+      <div class="lc-text-field">
+        <div class="">
+          <label class="lc-field-label" for="input-field-example-1">
+            Subtitle
+          </label>
+        </div>
+        <div>
+          <input type="text" class="lc-input" value="" name="rmSUBTITLE" required="" placeholder="Subtitle..."
+            id="input-field-example-1" />
+
+          <span class="lc-field-description">
+            Field is required and should contain only letters
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lc-field-group lc-field-group--inline">
+      <div class="lc-text-field">
+        <div class="">
+          <label class="lc-field-label" for="input-field-example-1">
+            Button text
+          </label>
+        </div>
+        <div>
+          <input type="text" class="lc-input" value="" name="rmBUTTON" required="" placeholder="Button..."
+            id="input-field-example-1" />
+
+          <span class="lc-field-description">
+            Field is required and should contain only letters
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <input type="button" class="lc-btn lc-btn--primary" onclick="richMessage()" value="Send to customer">
+    </div>
+  </form>
+
+
+
+</body>
+
+</html>
